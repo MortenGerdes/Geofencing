@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_maps);
 
         Toast.makeText(getApplicationContext(), "Trying to create geofence", Toast.LENGTH_LONG).show();
 
@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //Create Geofencing Request
         mGeofencingRequest = new GeofencingRequest.Builder()
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofence(mStorcenterNordFence)
                 .build();
 
         //Create Intent pointing to intent service
