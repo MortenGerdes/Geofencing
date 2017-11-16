@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -45,10 +46,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GeofencingRequest mGeofencingRequest;
     private PendingIntent mPendingIntent;
 
+    private Button mBtLaunchActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_main);
 
         Toast.makeText(getApplicationContext(), "Trying to create geofence", Toast.LENGTH_LONG).show();
 
@@ -60,6 +63,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .build();
         mLocationRequest = new LocationRequest();
         mRequestingLocationUpdates = true; //Starting the app the location updating is on
+
+        mBtLaunchActivity = findViewById(R.id.openMap);
+        mBtLaunchActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                startMap();
+            }
+        });
     }
 
     @Override
@@ -122,5 +134,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void updateUI(){
+    }
+
+    public void startMap()
+    {
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 }
