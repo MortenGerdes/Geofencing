@@ -12,8 +12,10 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,9 +36,10 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     public static final String TAG = "Aflevering 2";
-    private static final double STORCENTER_NORD_LATITUDE = 56.170608;
-    private static final double STORCENTER_NORD_LONGITUDE = 10.188461;
+    private static final double STORCENTER_NORD_LATITUDE = 56.17047693;
+    private static final double STORCENTER_NORD_LONGITUDE = 10.18840313;
     private static final float STORCENTER_NORD_RADIUS = 1500;
+    private static final int LOCATION_REQUEST_CODE = 1;
     private GoogleApiClient mGoogleApiClient;
     boolean mRequestingLocationUpdates; //has user turned location updates on or off?
     private String mLastUpdateTime;
@@ -87,37 +90,81 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Override
-    public void onConnectionSuspended(int cause) {
-        mGoogleApiClient.connect();
-    }
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d(TAG, "Google Play Services connected!");
 
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-    }
-
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        //Create fence around Storcenter Nord
-        mStorcenterNordFence = new Geofence.Builder().setRequestId("storcenter_nord")
+        // Let's create a Geofence around the Hovedbanegård
+        mStorcenterNordFence = new Geofence.Builder()
+                .setRequestId("storcenter_nord")
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .setCircularRegion(STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, STORCENTER_NORD_RADIUS)
                 .build();
-        //Create Geofencing Request
+
         mGeofencingRequest = new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .addGeofence(mStorcenterNordFence)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .build();
 
-        //Create Intent pointing to intent service
-        Intent intent = new Intent(this, ReceiveGeoFenceTransitionService.class);
+        // Create an Intent pointing to the IntentService
+        Intent intent = new Intent(this,
+                ReceiveGeoFenceTransitionService.class);
         mPendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        //some permission stuff created by android Studio
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+            LocationServices.GeofencingApi.addGeofences(mGoogleApiClient, mGeofencingRequest, mPendingIntent);
+            Log.d(TAG, "We added the geofence!");
+            Toast.makeText(this, "We added the geofence!", Toast.LENGTH_SHORT).show();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_REQUEST_CODE);
         }
-        LocationServices.GeofencingApi.addGeofences(mGoogleApiClient, mGeofencingRequest, mPendingIntent);
-        Toast.makeText(getApplicationContext(), "Geofence added!?", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    String message = "Location permission accepted. Geofence will be created.";
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+
+                    // OK, request it now
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    LocationServices.GeofencingApi.addGeofences(mGoogleApiClient, mGeofencingRequest, mPendingIntent);
+                    Log.d(TAG, "We added the geofence!");
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    String message = "Location permission denied. Geofence will not work.";
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
 
@@ -141,4 +188,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(TAG, "Google Play Services connection suspended!");
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(TAG, "Google Play Services connection failed!");
+    }
+
 }

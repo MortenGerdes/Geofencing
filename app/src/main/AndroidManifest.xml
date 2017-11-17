@@ -40,6 +40,9 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"></activity>
+        <service
+            android:name=".ReceiveGeoFenceTransitionService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

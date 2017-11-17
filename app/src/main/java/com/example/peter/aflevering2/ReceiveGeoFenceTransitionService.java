@@ -13,6 +13,7 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
@@ -35,13 +36,16 @@ public class ReceiveGeoFenceTransitionService extends IntentService {
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
 
         if (event.hasError()) {
+            Log.d("Storcenternord", "error");
             // TODO: Handle error
         } else {
+            Log.d("Storcenternord", "went to onHandleIntent");
             int transition = event.getGeofenceTransition();
 
             if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 String transitionType = getTransitionString(transition);
 
+                Log.d(MainActivity.TAG, getString(R.string.geofence_transition_notification_title, transitionType));
 
                 // Send a notification, when clicked, open website
                 String url = "https://www.rejseplanen.dk/webapp/index.html?language=en_EN&#!S|Aarhus%20H!Z|%C3%85bogade%2034%2C%208200%20Aarhus%20N%2C%20Aarhus%20Kommune!start|1";
@@ -65,11 +69,13 @@ public class ReceiveGeoFenceTransitionService extends IntentService {
                 }
 
                 Notification notification = new NotificationCompat.Builder(this.getApplicationContext(), CHANNEL_ID)
-                        .setContentTitle("Near Aarhus H!")
+                        .setContentTitle("Storcenter Nord!")
                         .setContentText("Check out how to get to the Datalogi building!")
-                        .setTicker("You're near the Hovedbanegaard. Do you want to see how to get to the CS building?")
+                        .setTicker("You're near Storcenter Nord. Do you want to see how to get to the CS building?")
                         .setContentIntent(contentIntent)
                         .setAutoCancel(true)
+                        .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.rejse))
+                        .setSmallIcon(R.drawable.stat_sys_gps_on)
                         .build();
 
                 Log.d(MainActivity.TAG, "Notification created");
@@ -83,6 +89,7 @@ public class ReceiveGeoFenceTransitionService extends IntentService {
             }
         }
     }
+
 
     /**
      * Maps geofence transition types to their human-readable equivalents.
