@@ -1,6 +1,7 @@
 package com.example.peter.aflevering2;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,8 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,7 +23,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
+    private static int GEOFENCE_MAPSACTIVITY_REQUEST_CODE = 102;
     private GoogleMap mMap;
 
     @Override
@@ -74,13 +77,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onMapClick(LatLng latLng) {
                 Marker chosenLocation = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
-                .title("Chosed location"));
+                .title("Chosen location"));
                 chosenLocation.showInfoWindow();
 
                 if(chosenLocation.isInfoWindowShown()){
                     //ManageGeofence geoActivity = new ManageGeofence();
                    // geoActivity.setCurrentLatLng(latLng);
-                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+
+                    SharedPreferences sharedPref = getSharedPreferences("shared", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("latitude", ""+ latLng.latitude);
                     editor.putString("longitude", ""+latLng.longitude);
@@ -94,7 +98,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void startManageGeofence(){
         Intent intent = new Intent(this, ManageGeofence.class);
-        startActivity(intent);
+        startActivityForResult(intent,GEOFENCE_MAPSACTIVITY_REQUEST_CODE );
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d("Geofence", "WENT HERE 2");
+
+        if (requestCode == GEOFENCE_MAPSACTIVITY_REQUEST_CODE){
+
+            if(resultCode == RESULT_OK){
+                setResult(Activity.RESULT_OK, data);
+                finish();
+            }
+            else{
+                Log.d("GeofenceResult", "error in creating geofence (MapsActivity)");
+            }
+        }
+    }
 }

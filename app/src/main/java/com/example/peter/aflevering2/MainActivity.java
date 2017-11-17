@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final double STORCENTER_NORD_LONGITUDE = 10.18840313;
     private static final float STORCENTER_NORD_RADIUS = 1500;
     private static final int LOCATION_REQUEST_CODE = 1;
+    private static final int GEOFENCE_REQUEST_CODE = 101;
     private GoogleApiClient mGoogleApiClient;
     boolean mRequestingLocationUpdates; //has user turned location updates on or off?
     private String mLastUpdateTime;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GeofencingRequest mGeofencingRequest;
     private PendingIntent mPendingIntent;
     private List<Geofence> mGeofenceList = new ArrayList<>();
+    private int onCreates = 0;
 
     private Button mBtLaunchActivity;
 
@@ -78,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 startMap();
             }
         });
+
+        onCreates += 1;
+        Toast.makeText(this, "onCreates: " + onCreates, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -89,19 +94,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onStop() {
         super.onStop();
-        mGoogleApiClient.disconnect();
+       //mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Google Play Services connected!");
+        addGeofence("storcenter_nord", STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, 1500);
 
+    }
+
+    public void addGeofence(String requestID, double latitude, double longitude, int radius){
         // Let's create a Geofence around the Hovedbanegård
         mStorcenterNordFence = new Geofence.Builder()
-                .setRequestId("storcenter_nord")
+                .setRequestId(requestID)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                .setCircularRegion(STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, STORCENTER_NORD_RADIUS)
+                .setCircularRegion(latitude, longitude, radius)
                 .build();
 
         mGeofencingRequest = new GeofencingRequest.Builder()
@@ -190,7 +210,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void startMap()
     {
         Intent intent = new Intent(this, MapsActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, GEOFENCE_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        onStart();
+        Log.d("Geofence", "WENT HERE 1");
+        if (requestCode == GEOFENCE_REQUEST_CODE){
+
+            if(resultCode == RESULT_OK){
+                String name = data.getStringExtra("name");
+                Double latitude = data.getDoubleExtra("latitude", 0);
+                Double longitude = data.getDoubleExtra("longitude", 0);
+                int radius = data.getIntExtra("radius", 0);
+                addGeofence(name, latitude, longitude, radius);
+                Log.d("Geofence", "NEW GEOFENCE  ADDED");
+                Toast.makeText(this, "New geofence added", Toast.LENGTH_LONG).show();
+            }
+            else{
+                Log.d("GeofenceResult", "error in creating geofence (MainActivity)");
+            }
+        }
     }
 
     @Override
