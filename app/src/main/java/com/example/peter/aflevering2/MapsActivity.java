@@ -3,6 +3,7 @@ package com.example.peter.aflevering2;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -79,6 +80,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(chosenLocation.isInfoWindowShown()){
                     //ManageGeofence geoActivity = new ManageGeofence();
                    // geoActivity.setCurrentLatLng(latLng);
+                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("latitude", ""+ latLng.latitude);
+                    editor.putString("longitude", ""+latLng.longitude);
+                    editor.commit();
                     startManageGeofence();
                 }
             }
