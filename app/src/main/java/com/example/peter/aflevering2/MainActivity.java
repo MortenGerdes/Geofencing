@@ -31,7 +31,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Geofence mStorcenterNordFence;
     private GeofencingRequest mGeofencingRequest;
     private PendingIntent mPendingIntent;
+    private List<Geofence> mGeofenceList = new ArrayList<>();
 
     private Button mBtLaunchActivity;
 
@@ -118,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             LocationServices.GeofencingApi.addGeofences(mGoogleApiClient, mGeofencingRequest, mPendingIntent);
             Log.d(TAG, "We added the geofence!");
             Toast.makeText(this, "We added the geofence!", Toast.LENGTH_SHORT).show();
+            mGeofenceList.add(mStorcenterNordFence);
         } else {
             ActivityCompat.requestPermissions(this, new String[]{
                             Manifest.permission.ACCESS_FINE_LOCATION,
