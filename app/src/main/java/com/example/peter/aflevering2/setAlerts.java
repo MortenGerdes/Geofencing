@@ -14,6 +14,7 @@ public class setAlerts extends AppCompatActivity {
 
     private Spinner spinner;
     private Button createAlertButton;
+    private Button deleteButton;
     private EditText alertMessageField;
 
 
@@ -28,6 +29,7 @@ public class setAlerts extends AppCompatActivity {
         alertMessageField = findViewById(R.id.setAlertText);
 
         createAlertButton = findViewById(R.id.createAlertButton);
+        deleteButton = findViewById(R.id.deleteButton);
         createAlertButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -46,10 +48,29 @@ public class setAlerts extends AppCompatActivity {
                     String alertMessage = alertMessageField.getText().toString();
                     intent.putExtra("selected_geofence", chosenGeo);
                     intent.putExtra("alert_message", alertMessage);
+                    intent.putExtra("which_button", "edit");
                     setResult(RESULT_OK, intent);
                     finish();
                 }
 
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(spinner.getSelectedItem() == null){
+                    Toast.makeText(getApplicationContext(), "Please select a geolocation", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Intent intent = new Intent();
+                    String chosenGeo = spinner.getSelectedItem().toString();
+                    intent.putExtra("selected_geofence", chosenGeo);
+                    intent.putExtra("shouldDelete", true);
+                    intent.putExtra("which_button", "delete");
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
             }
         });
 

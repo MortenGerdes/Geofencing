@@ -263,6 +263,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (requestCode == SET_ALERTS_REQUEST_CODE){
 
+            String whichButton = data.getStringExtra("which_button");
+
+            if(whichButton.equals("edit")){
+
+            }
+            else if(whichButton.equals("delete")){
+
+            }
         }
         else{
             Log.d("SetAlerts", "error in setting alert");
