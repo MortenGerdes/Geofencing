@@ -257,25 +257,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
 
-        if (requestCode == SET_ALERTS_REQUEST_CODE){
+        else if (requestCode == SET_ALERTS_REQUEST_CODE){
 
-            String whichButton = data.getStringExtra("which_button");
+            if (resultCode == RESULT_OK){
+                String whichButton = data.getStringExtra("which_button");
 
-            if(whichButton.equals("edit")){
+                if(whichButton.equals("edit")){
 
-            }
-            else if(whichButton.equals("delete")){
-                String name = data.getStringExtra("selected_geofence");
-                for(Geofence geo : mGeofenceList){
-                    if(geo.getRequestId().toString().equals(name)){
-                        mGeofenceList.remove(geo);
+                }
+                else if(whichButton.equals("delete")){
+                    String name = data.getStringExtra("selected_geofence");
+                    for(Geofence geo : mGeofenceList){
+                        if(geo.getRequestId().toString().equals(name)){
+                            mGeofenceList.remove(geo);
+                            return;
+                        }
                     }
                 }
             }
+            else{
+                Log.d("SetAlerts", "error in setting alert");
+            }
+
         }
-        else{
-            Log.d("SetAlerts", "error in setting alert");
-        }
+
     }
 
     @Override
