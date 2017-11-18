@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final float STORCENTER_NORD_RADIUS = 1500;
     private static final int LOCATION_REQUEST_CODE = 1;
     private static final int GEOFENCE_REQUEST_CODE = 101;
+    private static final int SET_ALERTS_REQUEST_CODE = 102;
     private GoogleApiClient mGoogleApiClient;
     boolean mRequestingLocationUpdates; //has user turned location updates on or off?
     private String mLastUpdateTime;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private int onCreates = 0;
 
     private Button mBtLaunchActivity;
+    private Button mBtAlert;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +75,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mRequestingLocationUpdates = true; //Starting the app the location updating is on
 
         mBtLaunchActivity = findViewById(R.id.openMap);
+        mBtAlert = findViewById(R.id.setAlertsButton);
         mBtLaunchActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 startMap();
+            }
+        });
+
+        mBtAlert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startSetAlerts();
             }
         });
 
@@ -207,6 +217,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void updateUI(){
     }
 
+    public void startSetAlerts(){
+        Intent intent = new Intent(this, setAlerts.class);
+        ArrayList array = new ArrayList();
+        for(Geofence geo : mGeofenceList){
+            array.add(geo.getRequestId().toString());
+        }
+
+        intent.putExtra("array", array);
+        startActivityForResult(intent, SET_ALERTS_REQUEST_CODE);
+
+    }
+
     public void startMap()
     {
         Intent intent = new Intent(this, MapsActivity.class);
@@ -231,6 +253,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             else{
                 Log.d("GeofenceResult", "error in creating geofence (MainActivity)");
             }
+        }
+
+        if (requestCode == SET_ALERTS_REQUEST_CODE){
+
+        }
+        else{
+            Log.d("SetAlerts", "error in setting alert");
         }
     }
 

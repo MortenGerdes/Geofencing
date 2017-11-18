@@ -45,7 +45,8 @@
             android:name=".ReceiveGeoFenceTransitionService"
             android:exported="false" />
 
-        <activity android:name=".ManageGeofence"></activity>
+        <activity android:name=".ManageGeofence" />
+        <activity android:name=".setAlerts"></activity>
     </application>
 
 </manifest>
