@@ -17,6 +17,8 @@ import com.google.android.gms.maps.model.LatLng;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
+
 public class ManageGeofence extends AppCompatActivity {
 
     private TextView latitudeTextView;
@@ -54,27 +56,33 @@ public class ManageGeofence extends AppCompatActivity {
                     return;
                 }
 
-                if(geofenceRadius.equals(null)){
+                else if(geofenceRadius.equals("")){
                     Toast.makeText(getApplicationContext(), "Please enter a radius for the geofence", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if(message.equals(null)){
+                else if(message.equals(null)){
                     Toast.makeText(getApplicationContext(), "Please enter an alert message", Toast.LENGTH_LONG).show();
                 }
+                else {
+                    String geofenceName = geofenceNameText.getText().toString();
+                    String messageText = message.getText().toString();
 
-                String geofenceName = geofenceNameText.getText().toString();
-                String messageText = message.getText().toString();
-                int radius = Integer.parseInt(geofenceRadius.getText().toString());
+                   try{
+                       int radius = Integer.parseInt(geofenceRadius.getText().toString());
+                       Intent intent = new Intent();
+                       intent.putExtra("latitude", Double.parseDouble(latitude));
+                       intent.putExtra("longitude", Double.parseDouble(longitude));
+                       intent.putExtra("name", geofenceName);
+                       intent.putExtra("radius", radius);
+                       intent.putExtra("message", messageText);
+                       setResult(Activity.RESULT_OK, intent);
+                       finish();
+                   }catch(Exception e){
+                       e.printStackTrace();
+                   }
 
-                Intent intent = new Intent();
-                intent.putExtra("latitude", Double.parseDouble(latitude));
-                intent.putExtra("longitude", Double.parseDouble(longitude));
-                intent.putExtra("name", geofenceName);
-                intent.putExtra("radius", radius);
-                intent.putExtra("message", messageText);
-                setResult(Activity.RESULT_OK, intent);
-                finish();
+                }
             }
         });
 
