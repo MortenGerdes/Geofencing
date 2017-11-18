@@ -24,6 +24,7 @@ public class ManageGeofence extends AppCompatActivity {
     private Button createButton;
     private EditText geofenceNameText;
     private EditText geofenceRadius;
+    private EditText message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class ManageGeofence extends AppCompatActivity {
         createButton = findViewById(R.id.createButton);
         geofenceNameText = findViewById(R.id.geofenceName);
         geofenceRadius = findViewById(R.id.radius);
+        message = findViewById(R.id.setMessageText);
 
         final SharedPreferences sharedPref = getSharedPreferences("shared", Context.MODE_PRIVATE);
         final String latitude = sharedPref.getString("latitude", "does not exist");
@@ -57,8 +59,12 @@ public class ManageGeofence extends AppCompatActivity {
                     return;
                 }
 
-                String geofenceName = geofenceNameText.getText().toString();
+                if(message.equals(null)){
+                    Toast.makeText(getApplicationContext(), "Please enter an alert message", Toast.LENGTH_LONG).show();
+                }
 
+                String geofenceName = geofenceNameText.getText().toString();
+                String messageText = message.getText().toString();
                 int radius = Integer.parseInt(geofenceRadius.getText().toString());
 
                 Intent intent = new Intent();
@@ -66,6 +72,7 @@ public class ManageGeofence extends AppCompatActivity {
                 intent.putExtra("longitude", Double.parseDouble(longitude));
                 intent.putExtra("name", geofenceName);
                 intent.putExtra("radius", radius);
+                intent.putExtra("message", messageText);
                 setResult(Activity.RESULT_OK, intent);
                 finish();
             }

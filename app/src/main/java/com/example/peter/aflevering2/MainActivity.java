@@ -121,11 +121,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Google Play Services connected!");
-        addGeofence("storcenter_nord", STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, 1500);
+        addGeofence("storcenter_nord", STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, 1500, "Hey, hvad så?");
 
     }
 
-    public void addGeofence(String requestID, double latitude, double longitude, int radius){
+    public void addGeofence(String requestID, double latitude, double longitude, int radius, String message){
         // Let's create a Geofence around the Hovedbanegård
         mStorcenterNordFence = new Geofence.Builder()
                 .setRequestId(requestID)
@@ -142,6 +142,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Create an Intent pointing to the IntentService
         Intent intent = new Intent(this,
                 ReceiveGeoFenceTransitionService.class);
+        intent.putExtra("message", message);
+        intent.putExtra("name", requestID);
+
         mPendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -222,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         ArrayList array = new ArrayList();
         for(Geofence geo : mGeofenceList){
             array.add(geo.getRequestId().toString());
+
         }
 
         intent.putExtra("array", array);
@@ -246,7 +250,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 Double latitude = data.getDoubleExtra("latitude", 0);
                 Double longitude = data.getDoubleExtra("longitude", 0);
                 int radius = data.getIntExtra("radius", 0);
-                addGeofence(name, latitude, longitude, radius);
+                String message = data.getStringExtra("message");
+
+                addGeofence(name, latitude, longitude, radius, message);
                 Log.d("Geofence", "NEW GEOFENCE  ADDED");
                 Toast.makeText(this, "New geofence added", Toast.LENGTH_LONG).show();
             }

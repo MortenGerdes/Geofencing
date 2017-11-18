@@ -45,7 +45,6 @@ public class ReceiveGeoFenceTransitionService extends IntentService {
             if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 String transitionType = getTransitionString(transition);
 
-                Log.d(MainActivity.TAG, getString(R.string.geofence_transition_notification_title, transitionType));
 
                 // Send a notification, when clicked, open website
                 String url = "https://www.rejseplanen.dk/webapp/index.html?language=en_EN&#!S|Aarhus%20H!Z|%C3%85bogade%2034%2C%208200%20Aarhus%20N%2C%20Aarhus%20Kommune!start|1";
@@ -69,8 +68,8 @@ public class ReceiveGeoFenceTransitionService extends IntentService {
                 }
 
                 Notification notification = new NotificationCompat.Builder(this.getApplicationContext(), CHANNEL_ID)
-                        .setContentTitle("Storcenter Nord!")
-                        .setContentText("Check out how to get to the Datalogi building!")
+                        .setContentTitle(intent.getStringExtra("name"))
+                        .setContentText(intent.getStringExtra("message"))
                         .setTicker("You're near Storcenter Nord. Do you want to see how to get to the CS building?")
                         .setContentIntent(contentIntent)
                         .setAutoCancel(true)
