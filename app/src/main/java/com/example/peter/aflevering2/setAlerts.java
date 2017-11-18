@@ -66,7 +66,6 @@ public class setAlerts extends AppCompatActivity {
                     Intent intent = new Intent();
                     String chosenGeo = spinner.getSelectedItem().toString();
                     intent.putExtra("selected_geofence", chosenGeo);
-                    intent.putExtra("shouldDelete", true);
                     intent.putExtra("which_button", "delete");
                     setResult(RESULT_OK, intent);
                     finish();

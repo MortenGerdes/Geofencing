@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static final String TAG = "Aflevering 2";
     private static final double STORCENTER_NORD_LATITUDE = 56.17047693;
     private static final double STORCENTER_NORD_LONGITUDE = 10.18840313;
-    private static final float STORCENTER_NORD_RADIUS = 1500;
+    private static final int STORCENTER_NORD_RADIUS = 1500;
     private static final int LOCATION_REQUEST_CODE = 1;
     private static final int GEOFENCE_REQUEST_CODE = 101;
     private static final int SET_ALERTS_REQUEST_CODE = 102;
@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GeofencingRequest mGeofencingRequest;
     private PendingIntent mPendingIntent;
     private List<Geofence> mGeofenceList = new ArrayList<>();
-    private int onCreates = 0;
 
     private Button mBtLaunchActivity;
     private Button mBtAlert;
@@ -62,8 +61,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Toast.makeText(getApplicationContext(), "Trying to create geofence", Toast.LENGTH_LONG).show();
 
         //Setup Google API
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -91,8 +88,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
 
-        onCreates += 1;
-        Toast.makeText(this, "onCreates: " + onCreates, Toast.LENGTH_LONG).show();
+
     }
 
     @Override
@@ -121,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Google Play Services connected!");
-        addGeofence("storcenter_nord", STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, 1500, "Hey, hvad så?");
+        addGeofence("storcenter_nord", STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, STORCENTER_NORD_RADIUS, "Hey, hvad så?");
 
     }
 
@@ -269,7 +265,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             }
             else if(whichButton.equals("delete")){
-
+                String name = data.getStringExtra("selected_geofence");
+                for(Geofence geo : mGeofenceList){
+                    if(geo.getRequestId().toString().equals(name)){
+                        mGeofenceList.remove(geo);
+                    }
+                }
             }
         }
         else{
