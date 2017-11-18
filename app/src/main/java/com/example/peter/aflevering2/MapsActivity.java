@@ -9,12 +9,16 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -22,11 +26,15 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private static int GEOFENCE_MAPSACTIVITY_REQUEST_CODE = 102;
     private GoogleMap mMap;
     private Location finalLocation = null;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private Location mLastKnownLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
         mapFragment.getMapAsync(this);
     }
 
@@ -50,14 +59,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        boolean isGPSAvailable = false, isNetworkAvailable = false;
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean isGPSAvailable = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean isNetworkAvailable = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         Location networkLocation = null;
         Location GPSLocation = null;
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        isGPSAvailable = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        isNetworkAvailable = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -95,10 +101,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             else
             {
-                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10f, this);
+                // If no internet was found
             }
         }
-
         double longitude = finalLocation.getLongitude();
         double latitude = finalLocation.getLatitude();
 
@@ -156,24 +161,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        finalLocation = location;
-
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
+    private void getDeviceLocation() {
+    /*
+     * Get the best and most recent location of the device, which may be null in rare
+     * cases when a location is not available.
+     */
+        try {
+                Task locationResult = mFusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            mLastKnownLocation = (Location) task.getResult();
+                        } else {
+                            Log.d("GeoFencing", "Current location is null. Using defaults.");
+                            Log.e("GeoFencing", "Exception: %s", task.getException());
+                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+        } catch(SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
     }
 }

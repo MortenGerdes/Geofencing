@@ -3,22 +3,19 @@ package com.example.peter.aflevering2;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -35,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, android.location.LocationListener {
 
     public static final String TAG = "Aflevering 2";
     private static final double STORCENTER_NORD_LATITUDE = 56.17047693;
@@ -87,8 +84,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 startSetAlerts();
             }
         });
-
-
     }
 
     @Override
@@ -118,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Google Play Services connected!");
         addGeofence("storcenter_nord", STORCENTER_NORD_LATITUDE, STORCENTER_NORD_LONGITUDE, STORCENTER_NORD_RADIUS, "Hey, hvad så?");
-
+        startLocationUpdates();
     }
 
     public void addGeofence(String requestID, double latitude, double longitude, int radius, String message){
@@ -204,12 +199,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        ((LocationManager)getSystemService(Context.LOCATION_SERVICE)).requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
     }
 
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
 
     }
 
@@ -293,5 +304,4 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "Google Play Services connection failed!");
     }
-
 }
