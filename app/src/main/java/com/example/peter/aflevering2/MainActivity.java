@@ -41,9 +41,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final double STORCENTER_NORD_LATITUDE = 56.17047693;
     private static final double STORCENTER_NORD_LONGITUDE = 10.18840313;
     private static final float STORCENTER_NORD_RADIUS = 1500;
-    private static final int LOCATION_REQUEST_CODE = 1;
-    private static final int GEOFENCE_REQUEST_CODE = 101;
-    private static final int SET_ALERTS_REQUEST_CODE = 102;
+    private final int LOCATION_REQUEST_CODE = 1;
+    private final int GEOFENCE_REQUEST_CODE = 101;
+    private final int SET_ALERTS_REQUEST_CODE = 102;
     private GoogleApiClient mGoogleApiClient;
     boolean mRequestingLocationUpdates; //has user turned location updates on or off?
     private String mLastUpdateTime;
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 Log.d("GeofenceResult", "error in creating geofence (MainActivity)");
             }
         }
-
+        System.out.println("Request code = " + requestCode);
         if (requestCode == SET_ALERTS_REQUEST_CODE){
 
             String whichButton = data.getStringExtra("which_button");

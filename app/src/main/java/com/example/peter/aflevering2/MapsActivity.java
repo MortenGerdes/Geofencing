@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -22,9 +23,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
     private static int GEOFENCE_MAPSACTIVITY_REQUEST_CODE = 102;
     private GoogleMap mMap;
+    private Location finalLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +50,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
+        boolean isGPSAvailable = false, isNetworkAvailable = false;
+        Location networkLocation = null;
+        Location GPSLocation = null;
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        isGPSAvailable = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        isNetworkAvailable = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -60,9 +69,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        double longitude = location.getLongitude();
-        double latitude = location.getLatitude();
+        if (isGPSAvailable) {
+            GPSLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+        if (isNetworkAvailable) {
+            networkLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        }
+
+        if (GPSLocation != null && networkLocation != null) {
+
+            //smaller the number more accurate result will
+            if (GPSLocation.getAccuracy() > networkLocation.getAccuracy()) {
+                finalLocation = networkLocation;
+            }
+            else {
+                finalLocation = GPSLocation;
+            }
+        }
+        else {
+            if (GPSLocation != null) {
+                finalLocation = GPSLocation;
+            }
+            else if (networkLocation != null) {
+                finalLocation = networkLocation;
+            }
+            else
+            {
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10f, this);
+            }
+        }
+
+        double longitude = finalLocation.getLongitude();
+        double latitude = finalLocation.getLatitude();
 
         mMap = googleMap;
 
@@ -116,5 +154,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("GeofenceResult", "error in creating geofence (MapsActivity)");
             }
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        finalLocation = location;
+
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
     }
 }
