@@ -44,7 +44,7 @@ public class ManageGeofence extends AppCompatActivity {
         final String longitude = sharedPref.getString("longitude", "does not exist");
 
         latitudeTextView.setText("Latitude: " + latitude);
-        longitudeTextView.setText("longitude: " + longitude);
+        longitudeTextView.setText("Longitude: " + longitude);
         Log.d("manageGeofence", latitude + longitude);
 
         createButton.setOnClickListener(new View.OnClickListener() {
