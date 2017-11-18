@@ -1,17 +1,20 @@
 package com.example.peter.aflevering2;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class setAlerts extends AppCompatActivity {
 
     private Spinner spinner;
     private Button createAlertButton;
-    private EditText alertMessage;
+    private EditText alertMessageField;
 
 
     @Override
@@ -22,7 +25,33 @@ public class setAlerts extends AppCompatActivity {
         spinner = findViewById(R.id.spinner);
         setDropDownAdapter(spinner);
 
+        alertMessageField = findViewById(R.id.setAlertText);
+
         createAlertButton = findViewById(R.id.createAlertButton);
+        createAlertButton.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+
+                if (spinner.getSelectedItem() == null){
+                    Toast.makeText(getApplicationContext(), "Please select a geolocation", Toast.LENGTH_LONG).show();
+                }
+
+                else if(alertMessageField.getText() == null){
+                    Toast.makeText(getApplicationContext(), "Please type an alert message", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Intent intent = new Intent();
+                    String chosenGeo = spinner.getSelectedItem().toString();
+                    String alertMessage = alertMessageField.getText().toString();
+                    intent.putExtra("selected_geofence", chosenGeo);
+                    intent.putExtra("alert_message", alertMessage);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+
+            }
+        });
 
 
     }

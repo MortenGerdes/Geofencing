@@ -39,7 +39,7 @@ public class ReceiveGeoFenceTransitionService extends IntentService {
             Log.d("Storcenternord", "error");
             // TODO: Handle error
         } else {
-            Log.d("Storcenternord", "went to onHandleIntent");
+
             int transition = event.getGeofenceTransition();
 
             if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
